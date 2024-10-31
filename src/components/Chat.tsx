@@ -5,20 +5,27 @@ import { ApiControll } from "@/Controllers"
 import Cookies from "js-cookie"
 import { jwtDecode } from "jwt-decode"
 
+interface DecodedToken {  id: string }
+
+interface MessageData { id: string; from: string; receive: string; data: string; createdAt: string;}
+
+interface ApiResponse { data: MessageData[];}
+
+interface CreateMessageResponse {  success: boolean; messageId: string;  }
+
 export default function Chat() {
 
-  const token: any = Cookies.get('token');
-  const decoded: any = token == undefined ? null : jwtDecode(token);        //decodifica o token e verifica se esta logado
+const token: string | undefined = Cookies.get('token')
+const decoded: DecodedToken | null = token === undefined ? null :  jwtDecode<DecodedToken>(token);      //decodifica o token e verifica se esta logado
     
     const {chat, dataUser, setUpdate, update} = useContext(ContextTsx)
-    const [dataMsg, setDataMsg] = useState<any>()
+    const [dataMsg, setDataMsg] = useState<MessageData[]>([]);
 
     const [dataForm, setDataForm] = useState({
       data: '',
     });
 
-    const handleChange = (e: any) => {
-      e.preventDefault();
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
       setDataForm((prevState) => ({
         ...prevState,
@@ -26,15 +33,14 @@ export default function Chat() {
       }));
     };
   
-
     useEffect(() => { 
       
       const getChatMessage = async () => 
         { 
-          if (decoded?.id && dataUser?.id)
+          if (decoded && decoded.id && dataUser && dataUser.id) 
            { try 
-            { const res: any = await ApiControll.getMessageChat(decoded.id, dataUser.id);    //faz o get apenas quando dataUser atualiza
-
+            {
+               const res = (await ApiControll.getMessageChat(decoded.id, dataUser.id)) as ApiResponse;
              setDataMsg(res.data); } 
              catch (error) { 
               console.log(error);
@@ -45,10 +51,12 @@ export default function Chat() {
           
 
     const sendMessage = async () => {
-
+      if (!dataForm.data || !decoded || !decoded.id) { 
+        return;
+      }
       try {
 
-        const res: any = await ApiControll.createMessage(decoded.id, dataUser.id, dataForm.data);
+        const res = await ApiControll.createMessage(decoded.id, dataUser.id, dataForm.data) as unknown as CreateMessageResponse;
         setUpdate(res);
         setDataForm({ data: '' });
         
@@ -69,13 +77,13 @@ export default function Chat() {
       </div>
       <div className="content-msg">
         
-      {dataMsg && dataMsg.map((user: any) => (
+      {dataMsg && dataMsg.map((user: MessageData) => (
   <Content key={user.id} id={user.from} date={user.createdAt} msg={user.data} />
 ))}
       </div>
 
       <div className="send flex">
-        <form  onSubmit={handleChange} className="w-full">
+      <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => e.preventDefault()} className="w-full">
 
         <input name="data" placeholder="Escreva sua mensagem" type="text" onChange={handleChange} value={dataForm.data} />
         </form>

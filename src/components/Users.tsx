@@ -1,25 +1,24 @@
-import { ContextTsx } from "@/Context/Context"
-import { useContext } from "react"
+import { useContext } from "react";
+import { ContextTsx } from "@/Context/Context";
 
-export default function Users({id, name}: any) {
+interface UsersProps {
+  id: string;
+  name: string;
+}
 
-
-  const {setWidth, setChat, setDataUser} = useContext(ContextTsx)
-
-
+export default function Users({ id, name }: UsersProps) {
+  const { setWidth, setChat, setDataUser } = useContext(ContextTsx);
+  
   const goChat = () => {
-    
-    setDataUser({id, name})
-    setWidth("0%")
-    setChat(true)
-    
-
-  }
+    setDataUser({ id, name });
+    setWidth("0%");
+    setChat(true);
+  };
 
   return (
     <div className="flex items-center" onClick={goChat}>
-           <img src="profile.png" width={100} alt="User"/>
-           <h1>{name}</h1>
+      <img src="profile.png" width={100} alt="User" />
+      <h1>{name}</h1>
     </div>
-  )
+  );
 }

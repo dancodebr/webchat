@@ -1,28 +1,26 @@
-import { useState } from 'react'
-import { NextUIProvider } from '@nextui-org/react'
-import { Button, Card, CardBody, CardFooter, CardHeader, Input, Link, Tab, Tabs } from '@nextui-org/react'
-import { motion } from 'framer-motion'
-import { MessageCircle, Users, Zap, Globe } from 'lucide-react'
-import { ApiControll } from '@/Controllers'
-import { jwtDecode } from 'jwt-decode'
-import Cookies from 'js-cookie'
-import { useRouter } from 'next/router'
+import { useState, ChangeEvent, FormEvent } from 'react';
+import { NextUIProvider } from '@nextui-org/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Input, Link, Tab, Tabs } from '@nextui-org/react';
+import { motion } from 'framer-motion';
+import { MessageCircle, Users, Zap, Globe } from 'lucide-react';
+import { ApiControll } from '@/Controllers';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/router';
 
+interface FormData {
+  name: string;
+  password: string;
+}
+
+interface AuthResponse { data: { token: string; }; status: number;}
 
 export default function Home() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [dataForm, setDataForm] = useState<FormData>({ name: '', password: '' });
 
-  const router = useRouter()
-
-
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(false)
-  
-  const [dataForm, setDataForm] = useState({
-    name: '',
-    password: '',
-  });
-
-  const handleChange = (e: any) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setDataForm((prevState) => ({
       ...prevState,
@@ -31,58 +29,52 @@ export default function Home() {
   };
 
   const SignUp = async () => {
+    try {
+      if (!dataForm.name || !dataForm.password) {
+        alert('Preencha todos os campos.');
+        return;
+      }
+      setIsLoading(true);
+      const res = await ApiControll.Signup(dataForm.name, dataForm.password) as unknown as AuthResponse;
 
-try {
-
-  if (!dataForm.name || !dataForm.password) {
-    alert('Preencha todos os campos.')
-    return
-  }
-
-  setIsLoading(true)
-  const res: any = await ApiControll.Signup(dataForm.name, dataForm.password)
-  console.log(res)
-  Cookies.set('token', res.data.token)
-  router.push('/home')
-  setIsLoading(false)
-  
-} catch (error) {
-console.log(error)
-setIsLoading(false)
-}
-}
-
-const SignIn = async () => {
-  try {
-    if (!dataForm.name || !dataForm.password) {
-      alert('Preencha todos os campos.');
-      return;
+      console.log(res);
+      Cookies.set('token', res.data.token);
+      router.push('/home');
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
     }
+  };
 
-    setIsLoading(true)
-    const res: any = await ApiControll.Signin(dataForm.name, dataForm.password)
-    console.log(res.status)
-    console.log(res)
-    if (res.status !== 200) {
-      setError(true)
-      setIsLoading(false)
-      setTimeout(() => {
-        setError(false)
-      }, 3000);
-      return
+  const SignIn = async () => {
+    try {
+      if (!dataForm.name || !dataForm.password) {
+        alert('Preencha todos os campos.');
+        return;
+      }
+      setIsLoading(true);
+      const res: AuthResponse = await ApiControll.Signin(dataForm.name, dataForm.password) as unknown as AuthResponse;
+      console.log(res.status);
+      console.log(res);
+      if (res.status !== 200) {
+        setError(true);
+        setIsLoading(false);
+        setTimeout(() => {
+          setError(false);
+        }, 3000);
+        return;
+      }
+      Cookies.set('token', res.data.token);
+      router.push('/home');
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
     }
+  };
 
-    Cookies.set('token', res.data.token)
-    router.push('/home')
-    setIsLoading(false)
 
-   
-  } catch (error) {
-   console.log(error);
-  }
-};
-
-console.log('aaaaaaaaaaaaaaaaaaaaaaa')
   return (
     <NextUIProvider>
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-950">
@@ -100,12 +92,11 @@ console.log('aaaaaaaaaaaaaaaaaaaaaaa')
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <Link  color="foreground" className="mr-4 text-white">Sobre</Link>
-              <Link  color="foreground" className="text-white">Contato</Link>
+              <Link color="foreground" className="mr-4 text-white">Sobre</Link>
+              <Link color="foreground" className="text-white">Contato</Link>
             </motion.div>
           </nav>
         </header>
-
         <main className="flex-grow flex items-center justify-center p-4">
           <Card className="w-full max-w-md">
             <CardHeader className="flex flex-col items-center">
@@ -115,8 +106,8 @@ console.log('aaaaaaaaaaaaaaaaaaaaaaa')
             <CardBody>
               <Tabs aria-label="Login options">
                 <Tab key="login" title="Login">
-                  <form onSubmit={handleChange} className="space-y-4 py-4">
-                  <Input
+                  <form onSubmit={(e: FormEvent<HTMLFormElement>) => e.preventDefault()} className="space-y-4 py-4">
+                    <Input
                       label="Nome"
                       placeholder="Seu nome"
                       name="name"
@@ -132,6 +123,7 @@ console.log('aaaaaaaaaaaaaaaaaaaaaaa')
                       variant="bordered"
                       onChange={handleChange}
                       isRequired
+
                     />
                   
                   </form>
@@ -145,7 +137,7 @@ console.log('aaaaaaaaaaaaaaaaaaaaaaa')
 
 
                 <Tab key="register" title="Registro">
-                  <form onSubmit={handleChange} className="space-y-4 py-4">
+                <form onSubmit={(e: FormEvent<HTMLFormElement>) => e.preventDefault()} className="space-y-4 py-4">
                     <Input
                       label="Nome"
                       placeholder="Seu nome"

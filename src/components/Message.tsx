@@ -1,47 +1,51 @@
-import {Divider} from "@nextui-org/divider";
+import { Divider } from "@nextui-org/divider";
 import { useContext, useEffect, useState } from "react";
 import { ContextTsx } from "@/Context/Context";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
-export default function Message({msg, userReceive, userFrom, from, receive} :any) {
+interface MessageProps {
+  msg: string;
+  userReceive: string;
+  userFrom: string;
+  from: string;
+  receive: string;
+}
 
-  const token: any = Cookies.get('token');
-  const decoded: any = token == undefined ? null : jwtDecode(token);        //decodifica o token e verifica se esta logado
+interface DecodedToken {
+  id: string;
+  name :string
 
-  const {setChat, setDataUser} = useContext(ContextTsx)
-  const [showCheck, setShowcheck] = useState(false)
+}
 
-  const id = from == decoded?.id ? receive : from
-  const name = userReceive == decoded?.name ? userFrom : userReceive
+export default function Message({ msg, userReceive, userFrom, from, receive }: MessageProps) {
+  const token: string | undefined = Cookies.get('token');
+  const decoded: DecodedToken | null = token == undefined ? null : jwtDecode<DecodedToken>(token); // Decodifica o token e verifica se está logado
+  const { setChat, setDataUser } = useContext(ContextTsx);
+  const [showCheck, setShowCheck] = useState(false);
+  const id = from == decoded?.id ? receive : from;
+  const name = userReceive == decoded?.name ? userFrom : userReceive;
 
-  useEffect(()=> {
+  useEffect(() => {
+    setShowCheck(decoded?.id === from);
+  }, [decoded, from]);
 
-    setShowcheck(decoded.id == from ? true : false)
-
-  },[])
-  
   const goChat = () => {
-    setDataUser({id, name})
-    setChat(true)
-  }
+    setDataUser({ id, name });
+    setChat(true);
+  };
 
   return (
-    <div className=  {`cont-message`} onClick={goChat}>
-     <div className="flex items-center">
-     <img src="profile.png" alt="profile" width={100} />
-     <div>
-     <h1>
-        {name}
-      </h1>
-      <p>
-       {msg}
-      </p>
-     </div>
-    {showCheck && <span className="check"><ion-icon  name="checkmark-outline"></ion-icon> </span>}
-     </div>
-   
-     <Divider orientation="horizontal"/>
+    <div className="cont-message" onClick={goChat}>
+      <div className="flex items-center">
+        <img src="profile.png" alt="profile" width={100} />
+        <div>
+          <h1>{name}</h1>
+          <p>{msg}</p>
+        </div>
+        {showCheck && <span className="check"><ion-icon name="checkmark-outline"></ion-icon> </span>}
+      </div>
+      <Divider orientation="horizontal" />
     </div>
-  )
+  );
 }

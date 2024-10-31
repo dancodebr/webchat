@@ -1,20 +1,29 @@
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import React from "react";
 
-export default function Content({id, date, msg}: any) {
+interface ContentProps {
+  id: string;
+  date: string;
+  msg: string;
+}
 
-  const token: any = Cookies.get('token');
-  const decoded: any = token == undefined ? null : jwtDecode(token);        //decodifica o token e verifica se esta logado
+interface DecodedToken {
+  id: string;
+  // Outras propriedades conforme necessário
+}
 
+export default function Content({ id, date, msg }: ContentProps) {
+  const token: string | undefined = Cookies.get('token');
+  const decoded: DecodedToken | null = token == undefined ? null : jwtDecode<DecodedToken>(token); // Decodifica o token e verifica se está logado
   const data = new Date(date).toLocaleTimeString('pt-BR');
-
-const position = decoded.id == id ? "justify-end" : "justify-start";     //poe na direita ou esquerda
+  const position = decoded && decoded.id === id ? "justify-end" : "justify-start"; // Põe na direita ou esquerda
 
   return (
     <div className={`msg ${position}`}>
       <div className="color-msg">
-      {msg}<span className="text-gray-300">{data}</span>
+        {msg}<span className="text-gray-300">{data}</span>
       </div>
     </div>
-  )
+  );
 }
