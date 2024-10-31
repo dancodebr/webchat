@@ -64,7 +64,7 @@ export default function Home() {
       setUser(decoded);
     };
     getUser();
-  }, [router]);
+  }, [router])
 
   useEffect(() => {
     const getMessages = async () => {
