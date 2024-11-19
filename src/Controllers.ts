@@ -1,12 +1,14 @@
 import axios from "axios";
 
+const BaseUrl = "https://api-chat-nu.vercel.app"
+
 class ApiController {
 
     async Signup(name: string, password: string) {
 
         try {
 
-            const res = await axios.post('http://3.138.136.255/webchat/signup', {
+            const res = await axios.post(`${BaseUrl}/signup`, {
                 name: name,
                 password: password
             });
@@ -25,7 +27,7 @@ class ApiController {
 
         try {
 
-            const res = await axios.post('http://3.138.136.255/webchat/signin', {
+            const res = await axios.post(`${BaseUrl}/signin`, {
                 name: name,
                 password: password
             });
@@ -41,7 +43,7 @@ class ApiController {
 
         try {
 
-            const res = await axios.get(`http://3.138.136.255/webchat/messages/${id}`);
+            const res = await axios.get(`${BaseUrl}/lastmessages/${id}`);
             
             return res
             
@@ -54,7 +56,7 @@ class ApiController {
 
         try {
             
-            const res = await axios.get(`http://3.138.136.255/webchat/users/${id}`);
+            const res = await axios.get(`${BaseUrl}/users/${id}`);
             
             return res
 
@@ -68,9 +70,9 @@ class ApiController {
         
         try {
 
-           const res = await axios.post('http://3.138.136.255/webchat/chat', {
+           const res = await axios.post(`${BaseUrl}/chat`, {
             from: MyId,
-            receive: UserId
+            to: UserId
            })
 
            return res
@@ -84,9 +86,9 @@ class ApiController {
 
         try {
 
-            const res = await axios.post('http://3.138.136.255/webchat/new', {
-              from: from,
-              receive: receive,
+            const res = await axios.post(`${BaseUrl}/message`, {
+              sender: from,
+              receiver: receive,
               data: data
             });
             

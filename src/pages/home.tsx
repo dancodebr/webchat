@@ -15,18 +15,10 @@ interface DecodedToken {
   // Adicione outras propriedades conforme necessário
 }
 
-interface Message {
-  id: string;
-  from: string;
-  receive: string;
-  data: string;
-  createdAt: string;
-}
-
 interface MessageData {
-  message: Message;
-  userFrom: string;
-  userReceive: string;
+  id: string;
+  name: string;
+  lastMessage: string;
 }
 
 
@@ -37,7 +29,7 @@ export default function Home() {
   const [data, setData] = useState<MessageData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  console.log(data)
+
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -72,8 +64,7 @@ export default function Home() {
       try {
         setLoading(true);
         const res = await ApiControll.getMessages(user.id) as { data: MessageData[] };
-        const sortedData = res.data.sort((a, b) => new Date(b.message.createdAt).getTime() - new Date(a.message.createdAt).getTime());
-        setData(sortedData);
+        setData(res.data)
         setLoading(false);
       } catch (error) {
         console.log(error);
@@ -117,9 +108,9 @@ export default function Home() {
           </span>
         </div>
         <div className="messages">
-          {loading ? <h1 className="start">CARREGANDO...</h1> : data.length > 0 ? (
+          {loading ? <h1 className="start">CARREGANDO...</h1> : data.length >0  ? (
             data.map((d) => (
-              <Message key={d.message.id} msg={d.message.data} userReceive={d.userReceive} userFrom={d.userFrom} from={d.message.from} receive={d.message.receive} />
+              <Message key={d.id} id={d.id} name={d.name} lastMessage={d.lastMessage}/>
             ))
           ) : (
             <div className="start">

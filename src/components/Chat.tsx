@@ -7,7 +7,7 @@ import { jwtDecode } from "jwt-decode"
 
 interface DecodedToken {  id: string }
 
-interface MessageData { id: string; from: string; receive: string; data: string; createdAt: string;}
+interface MessageData { id: string; sender: string; data: string; createdAt: string;}
 
 interface ApiResponse { data: MessageData[];}
 
@@ -78,7 +78,7 @@ const decoded: DecodedToken | null = token === undefined ? null :  jwtDecode<Dec
       <div className="content-msg">
         
       {dataMsg && dataMsg.map((user: MessageData) => (
-  <Content key={user.id} id={user.from} date={user.createdAt} msg={user.data} />
+  <Content key={user.id}  date={user.createdAt} msg={user.data} sender={user.sender} />
 ))}
       </div>
 
